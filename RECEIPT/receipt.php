@@ -1,0 +1,159 @@
+<?php
+// Verify data was submitted via POST
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Sanitize and process inputs
+    $customer_name = isset($_POST['name']) ? strtoupper(trim($_POST['name'])) : 'GUEST';
+    $generator_kva = isset($_POST['generator_kva']) ? (int)$_POST['generator_kva'] : 0;
+    $generators = isset($_POST['generators']) ? (int)$_POST['generators'] : 0;
+    $original_total = isset($_POST['total']) ? (float)$_POST['total'] : 0.00;
+    $discount_percent_input = isset($_POST['discount_rate']) ? (float)$_POST['discount_rate'] : 0;
+
+    // Convert percentage to decimal
+    $discount_percent = $discount_percent_input / 100;
+
+    // Loyalty Tier Messages
+    switch ($discount_percent_input) {
+        case 10:
+            $message = "Silver Member: You saved 10% today!";
+            break;
+        case 15:
+            $message = "Gold Member: You saved 15% today!";
+            break;
+        case 20:
+            $message = "Platinum Member: You saved 20% today! Plus, claim your free maintenance kit!";
+            break;
+        case 0:
+        default:
+            $message = "Keep ordering generators to earn higher discounts!";
+            break;
+    }
+
+    // Calculations
+    $discount_amount = $original_total * $discount_percent;
+    $final_total = $original_total - $discount_amount;
+} else {
+    // Redirect back if accessed without submitting the form
+    header('Location: cafe.php');
+    exit();
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt - Generator Store</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #f4f1ea;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .receipt {
+            background: #fff;
+            padding: 25px;
+            border: 1px dashed #333;
+            width: 100%;
+            max-width: 360px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .text-center {
+            text-align: center;
+        }
+        .divider {
+            border-top: 1px dashed #333;
+            margin: 15px 0;
+        }
+        .row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .total-row {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .message-box {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+        .btn-back {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            text-decoration: none;
+            color: #2c3e50;
+            font-family: Arial, sans-serif;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="receipt">
+        <h3 class="text-center">ARIZONA SUPPLIES LIMITED UGANDA </h3>
+         <p class="text-center">Empowering the future</p>
+        <p class="text-center">Official Sales Receipt</p>
+        
+        <div class="divider"></div>
+
+        <div class="row">
+            <span>CUSTOMER:</span>
+            <span><strong><?php echo htmlspecialchars($customer_name); ?></strong></span>
+        </div>
+
+        <div class="row">
+            <span>MODEL:</span>
+            <span><strong><?php echo htmlspecialchars($generator_kva); ?> kVA</strong></span>
+        </div>
+
+        <div class="row">
+            <span>MONTHLY QTY:</span>
+            <span><?php echo $generators; ?> Generator(s)</span>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="row">
+            <span>Original Total:</span>
+            <span>$<?php echo number_format($original_total, 2); ?></span>
+        </div>
+
+        <div class="row">
+            <span>Discount Rate:</span>
+            <span><?php echo $discount_percent_input; ?>%</span>
+        </div>
+
+        <div class="row">
+            <span>Discount Amount:</span>
+            <span>-$<?php echo number_format($discount_amount, 2); ?></span>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="row total-row">
+            <span>FINAL TOTAL:</span>
+            <span>$<?php echo number_format($final_total, 2); ?></span>
+        </div>
+
+        <div class="message-box">
+            <?php echo htmlspecialchars($message); ?>
+        </div>
+
+        <a href="cafe.php" class="btn-back">Thanks for supporting Arizona Supplies Limited Uganda</a>
+    </div>
+
+</body>
+</html>
